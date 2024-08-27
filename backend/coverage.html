@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">url-shortener/cmd/main.go (0.0%)</option>
+				
+				<option value="file1">url-shortener/internal/shared/app/lambda_router.go (0.0%)</option>
+				
+				<option value="file2">url-shortener/internal/shorturl/app/shorturl_handler.go (76.0%)</option>
+				
+				<option value="file3">url-shortener/internal/shorturl/app/shorturl_service.go (100.0%)</option>
+				
+				<option value="file4">url-shortener/internal/shorturl/core/shorturl_entity.go (100.0%)</option>
+				
+				<option value="file5">url-shortener/internal/shorturl/infrastructure/mock_repository.go (100.0%)</option>
+				
+				<option value="file6">url-shortener/internal/shorturl/infrastructure/shorturl_dynamodb.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        shared "url-shortener/internal/shared/app"
+        shortUrl "url-shortener/internal/shorturl/app"
+        "url-shortener/internal/shorturl/infrastructure"
+
+        "github.com/aws/aws-lambda-go/lambda"
+        "github.com/aws/aws-sdk-go-v2/config"
+        "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+)
+
+func main() <span class="cov0" title="0">{
+
+        cfg, err := config.LoadDefaultConfig(context.TODO(), func(o *config.LoadOptions) error </span><span class="cov0" title="0">{
+                o.Region = "us-east-1"
+                return nil
+        }</span>)
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+        <span class="cov0" title="0">db := dynamodb.NewFromConfig(cfg)
+
+        // Inyección de dependencias
+        shortURLRepo := infrastructure.NewDynamoDBShortUrlRepository(db, "shorturl-table")
+        shortURLService := shortUrl.NewShortUrlService(shortURLRepo)
+        shortURLHandler := shortUrl.NewShortUrlLambdaHandler(shortURLService)
+
+        // Routers
+        router := shared.NewLambdaRouter()
+        router.AddRoute("/short-url", shortURLHandler.HandleRequest)
+
+        // Inicia Lambda
+        lambda.Start(router.Handle)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package app
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/aws/aws-lambda-go/events"
+)
+
+type LambdaRouter struct {
+        routes map[string]func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+}
+
+func NewLambdaRouter() *LambdaRouter <span class="cov0" title="0">{
+        return &amp;LambdaRouter{
+                routes: make(map[string]func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)),
+        }
+}</span>
+
+func (r *LambdaRouter) AddRoute(path string, handler func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) <span class="cov0" title="0">{
+        r.routes[path] = handler
+}</span>
+
+func (r *LambdaRouter) Handle(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) <span class="cov0" title="0">{
+        handler, ok := r.routes[request.Resource]
+        if !ok </span><span class="cov0" title="0">{
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusNotFound,
+                        Body:       "Resource not found",
+                }, nil
+        }</span>
+
+        <span class="cov0" title="0">return handler(ctx, request)</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package app
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "url-shortener/internal/shorturl/core"
+
+        "github.com/aws/aws-lambda-go/events"
+)
+
+type ShortUrlLambdaHandler struct {
+        ShortUrlService core.ShortUrlService
+}
+
+func NewShortUrlLambdaHandler(service core.ShortUrlService) *ShortUrlLambdaHandler <span class="cov8" title="1">{
+        return &amp;ShortUrlLambdaHandler{ShortUrlService: service}
+}</span>
+
+func (h *ShortUrlLambdaHandler) HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) <span class="cov8" title="1">{
+        switch request.HTTPMethod </span>{
+        case http.MethodPost:<span class="cov8" title="1">
+                return h.handleCreateUrl(request)</span>
+        case http.MethodGet:<span class="cov8" title="1">
+                return h.handleGetUrl(request)</span>
+        default:<span class="cov0" title="0">
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusMethodNotAllowed,
+                        Body:       "Method not allowed",
+                }, nil</span>
+        }
+}
+
+func (h *ShortUrlLambdaHandler) handleCreateUrl(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) <span class="cov8" title="1">{
+        var Url core.Url
+
+        json.Unmarshal([]byte(request.Body), &amp;Url)
+
+        if err := Url.Validate(); err != nil </span><span class="cov8" title="1">{
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusBadRequest,
+                        Body:       "Invalid request body",
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">if err := h.ShortUrlService.CreateUrl(&amp;Url); err != nil </span><span class="cov8" title="1">{
+                fmt.Println(err)
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusInternalServerError,
+                        Body:       "Failed to create Url",
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">return events.APIGatewayProxyResponse{
+                StatusCode: http.StatusCreated,
+                Body:       "Url created successfully",
+        }, nil</span>
+}
+
+func (h *ShortUrlLambdaHandler) handleGetUrl(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) <span class="cov8" title="1">{
+        id := request.QueryStringParameters["id"]
+        Url, err := h.ShortUrlService.GetUrl(id)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusInternalServerError,
+                        Body:       "Failed to retrieve Url",
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">if Url == nil </span><span class="cov0" title="0">{
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusNotFound,
+                        Body:       "Url not found",
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">body, err := json.Marshal(Url)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return events.APIGatewayProxyResponse{
+                        StatusCode: http.StatusInternalServerError,
+                        Body:       "Failed to marshal response",
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">return events.APIGatewayProxyResponse{
+                StatusCode: http.StatusOK,
+                Body:       string(body),
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package app
+
+import "url-shortener/internal/shorturl/core"
+
+type ShortUrlService struct {
+        repo core.ShortUrlRepository
+}
+
+func NewShortUrlService(repo core.ShortUrlRepository) *ShortUrlService <span class="cov8" title="1">{
+        return &amp;ShortUrlService{repo: repo}
+}</span>
+
+func (s *ShortUrlService) CreateUrl(Url *core.Url) error <span class="cov8" title="1">{
+        return s.repo.Save(Url)
+}</span>
+
+func (s *ShortUrlService) GetUrl(id string) (*core.Url, error) <span class="cov8" title="1">{
+        return s.repo.GetByID(id)
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package core
+
+import (
+        "github.com/go-playground/validator/v10"
+)
+
+type Url struct {
+        ID          string `json:"id" validate:"required"`
+        UrlShorted  string `json:"urlShorted" validate:"required"`
+        UrlOriginal string `json:"urlOriginal" validate:"required"`
+        CreatedAt   string `json:"createdAt" validate:"required"`
+}
+
+var validate *validator.Validate
+
+func init() <span class="cov8" title="1">{
+        validate = validator.New()
+}</span>
+
+func (u *Url) Validate() error <span class="cov8" title="1">{
+        return validate.Struct(u)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">// Code generated by MockGen. DO NOT EDIT.
+// Source: internal/shorturl/infrastructure/shorturl_dynamodb.go
+
+// Package infrastructure is a generated GoMock package.
+package infrastructure
+
+import (
+        reflect "reflect"
+        core "url-shortener/internal/shorturl/core"
+
+        gomock "github.com/golang/mock/gomock"
+)
+
+// MockShortUrlRepository is a mock of ShortUrlRepository interface.
+type MockShortUrlRepository struct {
+        ctrl     *gomock.Controller
+        recorder *MockShortUrlRepositoryMockRecorder
+}
+
+// MockShortUrlRepositoryMockRecorder is the mock recorder for MockShortUrlRepository.
+type MockShortUrlRepositoryMockRecorder struct {
+        mock *MockShortUrlRepository
+}
+
+// NewMockShortUrlRepository creates a new mock instance.
+func NewMockShortUrlRepository(ctrl *gomock.Controller) *MockShortUrlRepository <span class="cov8" title="1">{
+        mock := &amp;MockShortUrlRepository{ctrl: ctrl}
+        mock.recorder = &amp;MockShortUrlRepositoryMockRecorder{mock}
+        return mock
+}</span>
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockShortUrlRepository) EXPECT() *MockShortUrlRepositoryMockRecorder <span class="cov8" title="1">{
+        return m.recorder
+}</span>
+
+// GetByID mocks base method.
+func (m *MockShortUrlRepository) GetByID(id string) (*core.Url, error) <span class="cov8" title="1">{
+        m.ctrl.T.Helper()
+        ret := m.ctrl.Call(m, "GetByID", id)
+        ret0, _ := ret[0].(*core.Url)
+        ret1, _ := ret[1].(error)
+        return ret0, ret1
+}</span>
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockShortUrlRepositoryMockRecorder) GetByID(id interface{}) *gomock.Call <span class="cov8" title="1">{
+        mr.mock.ctrl.T.Helper()
+        return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockShortUrlRepository)(nil).GetByID), id)
+}</span>
+
+// Save mocks base method.
+func (m *MockShortUrlRepository) Save(url *core.Url) error <span class="cov8" title="1">{
+        m.ctrl.T.Helper()
+        ret := m.ctrl.Call(m, "Save", url)
+        ret0, _ := ret[0].(error)
+        return ret0
+}</span>
+
+// Save indicates an expected call of Save.
+func (mr *MockShortUrlRepositoryMockRecorder) Save(url interface{}) *gomock.Call <span class="cov8" title="1">{
+        mr.mock.ctrl.T.Helper()
+        return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockShortUrlRepository)(nil).Save), url)
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package infrastructure
+
+import (
+        "context"
+        "fmt"
+        "url-shortener/internal/shorturl/core"
+
+        "github.com/aws/aws-sdk-go-v2/aws"
+        "github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+        "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+        "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+)
+
+type DynamoDBShortUrlRepository struct {
+        db    *dynamodb.Client
+        table string
+}
+
+func NewDynamoDBShortUrlRepository(db *dynamodb.Client, table string) *DynamoDBShortUrlRepository <span class="cov0" title="0">{
+        return &amp;DynamoDBShortUrlRepository{
+                db:    db,
+                table: table,
+        }
+}</span>
+
+func (r *DynamoDBShortUrlRepository) Save(Url *core.Url) error <span class="cov0" title="0">{
+
+        out, err := r.db.PutItem(context.TODO(), &amp;dynamodb.PutItemInput{
+                TableName: aws.String(r.table),
+                Item: map[string]types.AttributeValue{
+                        "id":          &amp;types.AttributeValueMemberS{Value: Url.ID},
+                        "urlShorted":  &amp;types.AttributeValueMemberS{Value: Url.UrlShorted},
+                        "urlOriginal": &amp;types.AttributeValueMemberS{Value: Url.UrlOriginal},
+                        "createdAt":   &amp;types.AttributeValueMemberS{Value: Url.CreatedAt},
+                },
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println(out.Attributes)
+
+        return err</span>
+}
+
+func (r *DynamoDBShortUrlRepository) GetByID(id string) (*core.Url, error) <span class="cov0" title="0">{
+        result, err := r.db.GetItem(context.TODO(), &amp;dynamodb.GetItemInput{
+                TableName: aws.String(r.table),
+                Key: map[string]types.AttributeValue{
+                        "id": &amp;types.AttributeValueMemberS{Value: id},
+                },
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">if result.Item == nil </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov0" title="0">Url := new(core.Url)
+
+        err = attributevalue.UnmarshalMap(result.Item, Url)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to unmarshal item: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return Url, err</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
