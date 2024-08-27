@@ -1,21 +1,78 @@
-## Micronaut 4.5.1 Documentation
+# 🌐 URL Shortener
 
-- [User Guide](https://docs.micronaut.io/4.5.1/guide/index.html)
-- [API Reference](https://docs.micronaut.io/4.5.1/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/4.5.1/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+Welcome to the **URL Shortener** project! This application provides a simple way to shorten long URLs, making them easier to share and manage. The project is composed of a powerful backend built with Golang and a sleek frontend developed with Astro.
 
-- [Micronaut Gradle Plugin documentation](https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/)
-- [GraalVM Gradle Plugin documentation](https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html)
-- [Shadow Gradle Plugin](https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow)
-## Feature serialization-jackson documentation
+## 🛠️ Tech Stack
 
-- [Micronaut Serialization Jackson Core documentation](https://micronaut-projects.github.io/micronaut-serialization/latest/guide/)
+### Infrastructure
+- **Cloud:** AWS
+- **IAC:** Terraform
+
+### Backend
+- **Language:** Go (Golang)
+- **Framework:** Custom Go-based REST API
+- **Database:** DynamoDB (NoSQL)
+- **Deployment:** AWS Lambda
+
+### Frontend
+- **Framework:** Astro.js
+- **Styling:** Tailwind CSS
+- **Build Tool:** Vite
+
+## 🚀 Features
+
+- **URL Shortening:** Shorten long URLs with a simple API call.
+- **Redirection:** Automatically redirect users from the short URL to the original URL.
+- **Responsive UI:** User-friendly interface that works seamlessly across devices.
+
+## 📂 Project Structure
+```
+url-shortener/
+├─ backend/
+│  ├─ cmd/
+│  ├─ e2e/
+│  ├─ internal/
+│  │  ├─ shared/
+│  │  ├─ shorturl/
+│  │  │  ├─ app/
+│  │  │  ├─ core/
+│  │  │  ├─ infrastructure/
+├─ frontend/
+```
 
 
-## Feature micronaut-aot documentation
+## 📝 Setup and Installation
 
-- [Micronaut AOT documentation](https://micronaut-projects.github.io/micronaut-aot/latest/guide/)
+### Infrastructure
+1. **Terraform init:**
+    ```bash
+    terraform init
+    ```
+2. Configure credentials in ./aws/credentials and set profile as personal (in my case)
 
+3. **Terraform Plan**
+    ```bash
+    terraform plan
+    ```
+3. **Terraform Apply**
+    ```bash
+    terraform apply
+    ```
+
+
+### Backend
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/url-shortener.git
+   cd url-shortener/backend
+   ```
+2. **Install dependencies:**
+    ```bash
+   cd backend && go mod tidy
+   ```
+3. **Clone the repository:**
+    ```bash
+   cd backend && ./build.sh
+   ```
 
