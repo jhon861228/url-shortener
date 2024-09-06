@@ -11,6 +11,14 @@ type Url struct {
 	CreatedAt   string `json:"createdAt" validate:"required"`
 }
 
+type UrlRequest struct {
+	UrlOriginal string `json:"urlOriginal" validate:"required"`
+}
+
+type UrlResponse struct {
+	UrlShorted string `json:"urlShorted" validate:"required"`
+}
+
 var validate *validator.Validate
 
 func init() {
@@ -18,5 +26,9 @@ func init() {
 }
 
 func (u *Url) Validate() error {
+	return validate.Struct(u)
+}
+
+func (u *UrlRequest) ValidateUrlRequest() error {
 	return validate.Struct(u)
 }

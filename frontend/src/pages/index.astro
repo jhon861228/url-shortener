@@ -1,16 +1,22 @@
 ---
-
+import "./../styles/global.css";
+import CopyIcon from "../components/CopyIcon.astro";
+import IndexLayout from "../layouts/IndexLayout.astro";
+import UrlShortenCreation from "../components/UrlShortenCreation.astro";
+import UrlShortenList from "../components/UrlShortenList.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<IndexLayout title="Url Shortener">
+	<div class="mx-auto sm:px-4 max-w-md space-y-6 py-12">
+		<div class="space-y-2 text-center">
+		  <h1 class="text-3xl font-bold text-primary">Acortador de URLs</h1>
+		  <p class="text-muted-foreground">Simplifica tus links</p>
+		</div>
+		<div class="space-y-4">
+		  <UrlShortenCreation/>
+		</div>
+		<div class="space-y-4">
+			<UrlShortenList/>
+		</div>
+	</div>
+</IndexLayout>

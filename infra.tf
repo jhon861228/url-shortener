@@ -101,55 +101,13 @@ resource "aws_lambda_function" "my_lambda_function" {
 resource "aws_api_gateway_rest_api" "api" {
   name        = "api-url-shortener"
   description = "API for my Lambda function"
-}
 
-# Recurso en el API Gateway para /short-url
-resource "aws_api_gateway_resource" "short_url_resource" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "short-url"
-}
-
-# Método GET para /short-url
-resource "aws_api_gateway_method" "get_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.short_url_resource.id
-  http_method   = "GET"
-  authorization = "NONE"
-  api_key_required = true
-}
-
-# Método GET con la función Lambda
-resource "aws_api_gateway_integration" "get_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.short_url_resource.id
-  http_method             = aws_api_gateway_method.get_method.http_method
-  type                    = "AWS_PROXY"
-  integration_http_method = "POST"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.my_lambda_function.arn}/invocations"
-}
-
-# Método POST para /short-url
-resource "aws_api_gateway_method" "post_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.short_url_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
-  api_key_required = true
-}
-
-# Método POST con la función Lambda
-resource "aws_api_gateway_integration" "post_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.short_url_resource.id
-  http_method             = aws_api_gateway_method.post_method.http_method
-  type                    = "AWS_PROXY"
-  integration_http_method = "POST"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.my_lambda_function.arn}/invocations"
+  body = file("${path.module}/openapi/shorturl_api.json")
 }
 
 # API Gateway invoque la función Lambda
 resource "aws_lambda_permission" "api_gateway" {
+
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.my_lambda_function.function_name
@@ -159,9 +117,12 @@ resource "aws_lambda_permission" "api_gateway" {
 
 # Etapa de despliegue para la API
 resource "aws_api_gateway_deployment" "deployment" {
-  depends_on   = [aws_api_gateway_integration.get_integration, aws_api_gateway_integration.post_integration]
+  depends_on   = [aws_api_gateway_rest_api.api]
   rest_api_id  = aws_api_gateway_rest_api.api.id
   stage_name   = "prod"
+  triggers = {
+    redeploy = sha256(file("${path.module}/openapi/shorturl_api.json"))
+  }
 }
 
 # Api key

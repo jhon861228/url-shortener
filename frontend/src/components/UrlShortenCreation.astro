@@ -1,0 +1,33 @@
+---
+import Input from "./Input.astro";
+import Button from "./Button.astro";
+import CopyIcon from "./CopyIcon.astro";
+import { shortUrl } from "./../lib/fetchData"
+
+try {
+    shortUrl("")
+} catch (error) {
+    
+}
+
+---
+<div class="flex items-center gap-2">
+    <Input
+        type="text"
+        placeholder="Enter your URL"
+    />
+    <div class="w-20">
+        <Button>Generar</Button>
+    </div>
+</div>
+<div class="space-y-2">
+    <div class="flex items-center justify-between rounded-md bg-muted px-4 py-2">
+        <p class="text-sm font-medium text-foreground">
+        https://example.com/very-long-url-that-needs-shortening
+        </p>
+        <button class="text-muted-foreground hover:bg-muted/50">
+            <CopyIcon class="h-4 w-4" />
+            <span class="sr-only">Copiar</span>
+        </button>
+    </div>
+</div>

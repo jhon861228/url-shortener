@@ -29,8 +29,10 @@ func main() {
 
 	// Routers
 	router := shared.NewLambdaRouter()
-	router.AddRoute("/short-url", shortURLHandler.HandleRequest)
 
-	// Inicia Lambda
-	lambda.Start(router.Handle)
+	router.AddRouteWithMethod("/short-url", "POST", shortURLHandler.HandlePostRequest)
+
+	router.AddRouteWithPathParam("/{urlId}", "GET", shortURLHandler.HandleGetRequest)
+
+	lambda.Start(router.HandleRequest)
 }

@@ -1,0 +1,28 @@
+---
+import CopyIcon from "./CopyIcon.astro";
+---
+
+<h2 class="text-xl font-bold text-primary">Shortened URLs</h2>
+<div class="space-y-2">
+  <div class="flex items-center justify-between rounded-md bg-muted px-4 py-2">
+    <p class="text-sm font-medium text-foreground">https://example.com/abc123</p>
+    <button class="text-muted-foreground hover:bg-muted/50">
+      <CopyIcon class="h-4 w-4" />
+      <span class="sr-only">Copiar</span>
+    </button>
+  </div>
+  <div class="flex items-center justify-between rounded-md bg-muted px-4 py-2">
+    <p class="text-sm font-medium text-foreground">https://example.com/def456</p>
+    <button class="text-muted-foreground hover:bg-muted/50">
+      <CopyIcon class="h-4 w-4" />
+      <span class="sr-only">Copiar</span>
+    </button>
+  </div>
+  <div class="flex items-center justify-between rounded-md bg-muted px-4 py-2">
+    <p class="text-sm font-medium text-foreground">https://example.com/ghi789</p>
+    <button class="text-muted-foreground hover:bg-muted/50">
+      <CopyIcon class="h-4 w-4" />
+      <span class="sr-only">Copiar</span>
+    </button>
+  </div>
+</div>

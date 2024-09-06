@@ -18,33 +18,28 @@ func NewShortUrlLambdaHandler(service core.ShortUrlService) *ShortUrlLambdaHandl
 	return &ShortUrlLambdaHandler{ShortUrlService: service}
 }
 
-func (h *ShortUrlLambdaHandler) HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	switch request.HTTPMethod {
-	case http.MethodPost:
-		return h.handleCreateUrl(request)
-	case http.MethodGet:
-		return h.handleGetUrl(request)
-	default:
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusMethodNotAllowed,
-			Body:       "Method not allowed",
-		}, nil
-	}
+func (h *ShortUrlLambdaHandler) HandleGetRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return h.handleGetUrl(request)
+}
+
+func (h *ShortUrlLambdaHandler) HandlePostRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return h.handleCreateUrl(request)
 }
 
 func (h *ShortUrlLambdaHandler) handleCreateUrl(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var Url core.Url
+	var body core.UrlRequest
 
-	json.Unmarshal([]byte(request.Body), &Url)
+	json.Unmarshal([]byte(request.Body), &body)
 
-	if err := Url.Validate(); err != nil {
+	if err := body.ValidateUrlRequest(); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "Invalid request body",
 		}, nil
 	}
 
-	if err := h.ShortUrlService.CreateUrl(&Url); err != nil {
+	url, err := h.ShortUrlService.CreateUrl(&body)
+	if err != nil {
 		fmt.Println(err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -52,14 +47,15 @@ func (h *ShortUrlLambdaHandler) handleCreateUrl(request events.APIGatewayProxyRe
 		}, nil
 	}
 
+	bodyResponse, _ := json.Marshal(core.UrlResponse{UrlShorted: url.UrlShorted})
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
-		Body:       "Url created successfully",
+		Body:       string(bodyResponse),
 	}, nil
 }
 
 func (h *ShortUrlLambdaHandler) handleGetUrl(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	id := request.QueryStringParameters["id"]
+	id := request.PathParameters["urlId"]
 	Url, err := h.ShortUrlService.GetUrl(id)
 	if err != nil {
 		fmt.Println(err)
@@ -76,8 +72,7 @@ func (h *ShortUrlLambdaHandler) handleGetUrl(request events.APIGatewayProxyReque
 		}, nil
 	}
 
-	body, err := json.Marshal(Url)
-	if err != nil {
+	if _, err := json.Marshal(Url); err != nil {
 		fmt.Println(err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -86,7 +81,8 @@ func (h *ShortUrlLambdaHandler) handleGetUrl(request events.APIGatewayProxyReque
 	}
 
 	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Body:       string(body),
+		StatusCode: http.StatusFound,
+		Body:       "",
+		Headers:    map[string]string{"Location": Url.UrlOriginal},
 	}, nil
 }

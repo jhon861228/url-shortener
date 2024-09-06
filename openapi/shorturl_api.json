@@ -1,0 +1,254 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Your first API with Amazon API Gateway. This is a sample API that integrates via HTTP with our demo Url shortener endpoints",
+        "title": "UrlShortener",
+        "version": "1.0"
+    },
+    "schemes": [
+        "https"
+    ],
+    "paths": {
+        "/{urlId}": {
+            "get": {
+                "tags": [
+                    "urls"
+                ],
+                "summary": "Info for a specific Url",
+                "operationId": "GetUrl",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "urlId",
+                        "in": "path",
+                        "description": "The id of the Url to retrieve",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        },
+                        "headers": {
+                            "Access-Control-Allow-Origin": {
+                                "type": "string",
+                                "description": "URI that may access the resource"
+                            },
+                            "Location": {
+                                "type": "string",
+                                "description": "URI that may access the resource"
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "responses": {
+                        "default": {
+                            "statusCode": "302",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    },
+                    "requestParameters": {
+                        "integration.request.path.urlId": "method.request.path.urlId"
+                    },
+                    "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:326520883180:function:url-shortener/invocations",
+                    "passthroughBehavior": "when_no_match",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy"
+                }
+            },
+            "options": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "urlId",
+                        "in": "path",
+                        "description": "The id of the Url to retrieve",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        },
+                        "headers": {
+                            "Access-Control-Allow-Origin": {
+                                "type": "string",
+                                "description": "URI that may access the resource"
+                            },
+                            "Access-Control-Allow-Methods": {
+                                "type": "string",
+                                "description": "Method or methods allowed when accessing the resource"
+                            },
+                            "Access-Control-Allow-Headers": {
+                                "type": "string",
+                                "description": "Used in response to a preflight request to indicate which HTTP headers can be used when making the request."
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "responses": {
+                        "default": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,Location'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "requestTemplates": {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "type": "mock"
+                }
+            }
+        },
+        "/short-url": {
+            "post": {
+                "tags": [
+                    "urls"
+                ],
+                "operationId": "ShortUrl",
+                "summary": "Short a Url",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "url",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/NewUrl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/NewUrlResponse"
+                        },
+                        "headers": {
+                            "Access-Control-Allow-Origin": {
+                                "type": "string",
+                                "description": "URI that may access the resource"
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "responses": {
+                        "default": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    },
+                    "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:326520883180:function:url-shortener/invocations",
+                    "passthroughBehavior": "when_no_match",
+                    "httpMethod": "POST",
+                    "type": "aws_proxy"
+                }
+            },
+            "options": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        },
+                        "headers": {
+                            "Access-Control-Allow-Origin": {
+                                "type": "string",
+                                "description": "URI that may access the resource"
+                            },
+                            "Access-Control-Allow-Methods": {
+                                "type": "string",
+                                "description": "Method or methods allowed when accessing the resource"
+                            },
+                            "Access-Control-Allow-Headers": {
+                                "type": "string",
+                                "description": "Used in response to a preflight request to indicate which HTTP headers can be used when making the request."
+                            }
+                        }
+                    }
+                },
+                "x-amazon-apigateway-integration": {
+                    "responses": {
+                        "default": {
+                            "statusCode": "200",
+                            "responseParameters": {
+                                "method.response.header.Access-Control-Allow-Methods": "'POST,GET,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "requestTemplates": {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "type": "mock"
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Empty": {
+            "type": "object"
+        },
+        "NewUrlResponse": {
+            "type": "object",
+            "properties": {
+                "urlShorted": {
+                    "type": "string"
+                }
+            }
+        },
+        "Url": {
+            "type": "object",
+            "properties": {
+                "urlOriginal": {
+                    "type": "string"
+                }
+            }
+        },
+        "NewUrl": {
+            "type": "object",
+            "properties": {
+                "urlOriginal": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
