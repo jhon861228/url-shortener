@@ -9,6 +9,20 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "urlOriginalIndex" {
+  description = "Index to use in the table"
+  type        = string
+  default     = "original-url-index"
+}
+
+variable "urlOriginalIndexField" {
+  description = "Field to use in the index"
+  type        = string
+  default     = "urlOriginal"
+}
+
+
+
 # Tabla DynamoDB
 resource "aws_dynamodb_table" "shorturl_table" {
   name           = "shorturl-table"
@@ -17,6 +31,16 @@ resource "aws_dynamodb_table" "shorturl_table" {
   
   attribute {
     name = "id"
+    type = "S"
+  }
+  global_secondary_index {
+    name            = var.urlOriginalIndex
+    hash_key        = var.urlOriginalIndexField
+    projection_type = "INCLUDE"
+    non_key_attributes = [var.urlOriginalIndexField, "urlShorted"]
+  }
+  attribute {
+    name = var.urlOriginalIndexField
     type = "S"
   }
 }
@@ -63,7 +87,10 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
           "dynamodb:Scan",
           "dynamodb:Query"
         ],
-        Resource = aws_dynamodb_table.shorturl_table.arn
+        Resource = [
+          aws_dynamodb_table.shorturl_table.arn,
+          "${aws_dynamodb_table.shorturl_table.arn}/index/${var.urlOriginalIndex}"
+        ]
       }
     ]
   })
@@ -93,6 +120,10 @@ resource "aws_lambda_function" "my_lambda_function" {
   environment {
     variables = {
       TABLE_NAME = aws_dynamodb_table.shorturl_table.name
+      DOMAIN = "https://4o41uoibs7.execute-api.us-east-1.amazonaws.com/prod/"
+      APP_REGION = var.region
+      URLORIGINAL_INDEX = var.urlOriginalIndex
+      URLORIGINAL_INDEX_FIELD = var.urlOriginalIndexField
     }
   }
 }
@@ -163,4 +194,51 @@ resource "aws_api_gateway_usage_plan_key" "my_usage_plan_key" {
 output "api_gateway_url" {
   description = "URL del API Gateway"
   value       = "https://${aws_api_gateway_rest_api.api.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.deployment.stage_name}"
+}
+
+# Alarmas CloudWatch
+resource "aws_cloudwatch_metric_alarm" "dynamodb_read_capacity_alarm" {
+  alarm_name          = "DynamoDBReadCapacityExceeded"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "ConsumedReadCapacityUnits"
+  namespace           = "AWS/DynamoDB"
+  period              = "300" # 5 minutos
+  statistic           = "Sum"
+  threshold           = "25"  # Umbral (capa gratuita son 25 unidades de lectura por segundo)
+  alarm_description   = "Alarma cuando las lecturas superan las 25 unidades de capacidad en 5 minutos"
+  dimensions = {
+    TableName = aws_dynamodb_table.shorturl_table.name
+  }
+
+  # Opción para enviar la alarma a un SNS
+  alarm_actions = [aws_sns_topic.dynamodb_alert.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "dynamodb_write_capacity_alarm" {
+  alarm_name          = "DynamoDBWriteCapacityExceeded"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "ConsumedWriteCapacityUnits"
+  namespace           = "AWS/DynamoDB"
+  period              = "300" # 5 minutos
+  statistic           = "Sum"
+  threshold           = "25"  # Umbral (capa gratuita son 25 unidades de escritura por segundo)
+  alarm_description   = "Alarma cuando las escrituras superan las 25 unidades de capacidad en 5 minutos"
+  dimensions = {
+    TableName = aws_dynamodb_table.shorturl_table.name
+  }
+
+  alarm_actions = [aws_sns_topic.dynamodb_alert.arn]
+}
+
+
+resource "aws_sns_topic" "dynamodb_alert" {
+  name = "dynamodb-shorturl-alert"
+}
+
+resource "aws_sns_topic_subscription" "email_alert" {
+  topic_arn = aws_sns_topic.dynamodb_alert.arn
+  protocol  = "email"
+  endpoint  = "dago365@hotmail.com"
 }

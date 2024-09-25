@@ -1,30 +1,21 @@
 package main
 
 import (
-	"context"
 	shared "url-shortener/internal/shared/app"
+	sharedConfig "url-shortener/internal/shared/config"
 	shortUrl "url-shortener/internal/shorturl/app"
 	"url-shortener/internal/shorturl/infrastructure"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 func main() {
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), func(o *config.LoadOptions) error {
-		o.Region = "us-east-1"
-		return nil
-	})
-	if err != nil {
-		panic(err)
-	}
-	db := dynamodb.NewFromConfig(cfg)
+	cfg := sharedConfig.LoadConfig()
 
 	// Inyección de dependencias
-	shortURLRepo := infrastructure.NewDynamoDBShortUrlRepository(db, "shorturl-table")
-	shortURLService := shortUrl.NewShortUrlService(shortURLRepo)
+	shortURLRepo := infrastructure.NewDynamoDBShortUrlRepository(cfg.DB, cfg.TableName)
+	shortURLService := shortUrl.NewShortUrlService(shortURLRepo, cfg.UrlOriginalIndex, cfg.UrlOriginalIndexField)
 	shortURLHandler := shortUrl.NewShortUrlLambdaHandler(shortURLService)
 
 	// Routers

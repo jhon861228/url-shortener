@@ -1,22 +1,23 @@
 ---
 import "./../styles/global.css";
-import CopyIcon from "../components/CopyIcon.astro";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import IndexLayout from "../layouts/IndexLayout.astro";
-import UrlShortenCreation from "../components/UrlShortenCreation.astro";
-import UrlShortenList from "../components/UrlShortenList.astro";
+import UrlShortenCreation from "../components/UrlShortenCreation";
+import UrlShortenList from "../components/UrlShortenList";
 ---
 
-<IndexLayout title="Url Shortener">
-	<div class="mx-auto sm:px-4 max-w-md space-y-6 py-12">
-		<div class="space-y-2 text-center">
-		  <h1 class="text-3xl font-bold text-primary">Acortador de URLs</h1>
-		  <p class="text-muted-foreground">Simplifica tus links</p>
-		</div>
-		<div class="space-y-4">
-		  <UrlShortenCreation/>
-		</div>
-		<div class="space-y-4">
-			<UrlShortenList/>
-		</div>
-	</div>
+<IndexLayout title="Acortador de Urls">
+	<Card className="w-full max-w-md bg-white bg-opacity-90 backdrop-blur-md shadow-xl">
+		<CardHeader className="text-center">
+		  <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">
+			Acortador de Urls
+		  </CardTitle>
+		</CardHeader>
+		<CardContent>
+		  <UrlShortenCreation client:only="react"/>
+		  <UrlShortenList client:only="react"/>
+		</CardContent>
+	  </Card>
 </IndexLayout>

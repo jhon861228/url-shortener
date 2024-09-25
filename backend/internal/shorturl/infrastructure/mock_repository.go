@@ -49,6 +49,20 @@ func (mr *MockShortUrlRepositoryMockRecorder) GetByID(id interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockShortUrlRepository)(nil).GetByID), id)
 }
 
+// GetByField mocks base method.
+func (m *MockShortUrlRepository) GetByField(indexName string, fieldName string, fieldValue string) ([]*core.Url, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByField", indexName, fieldName, fieldValue)
+	ret0, _ := ret[0].([]*core.Url)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockShortUrlRepositoryMockRecorder) GetByField(indexName interface{}, fieldName interface{}, fieldValue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByField", reflect.TypeOf((*MockShortUrlRepository)(nil).GetByField), indexName, fieldName, fieldValue)
+}
+
 // Save mocks base method.
 func (m *MockShortUrlRepository) Save(url *core.Url) error {
 	m.ctrl.T.Helper()

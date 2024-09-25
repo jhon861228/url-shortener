@@ -69,3 +69,34 @@ func (r *DynamoDBShortUrlRepository) GetByID(id string) (*core.Url, error) {
 
 	return Url, err
 }
+
+func (r *DynamoDBShortUrlRepository) GetByField(indexName string, fieldName string, fieldValue string) ([]*core.Url, error) {
+	fmt.Println(r.table, indexName, fieldName, fieldValue)
+	result, err := r.db.Query(context.TODO(), &dynamodb.QueryInput{
+		TableName:              aws.String(r.table),
+		IndexName:              aws.String(indexName),
+		KeyConditionExpression: aws.String("#field = :value"),
+		ExpressionAttributeNames: map[string]string{
+			"#field": fieldName,
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":value": &types.AttributeValueMemberS{Value: fieldValue},
+		},
+	})
+	fmt.Println(result)
+	fmt.Println(err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query items: %w", err)
+	}
+	var urls []*core.Url
+	err = attributevalue.UnmarshalListOfMaps(result.Items, &urls)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal items: %v", err)
+	}
+
+	if len(urls) == 0 {
+		return nil, nil
+	}
+
+	return urls, nil
+}
