@@ -6,6 +6,9 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
+  build: {
+    minimize: true,
+  },
   output: "server",
   adapter: awsAmplify(),
   integrations: [tailwind(), react()],
