@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function useClipboard(event: any) {
+export function useClipboard() {
 	const [isCopied, setIsCopied] = useState(false);
 	const [err, setErr] = useState<string | null>(null);
 
@@ -9,7 +9,6 @@ export function useClipboard(event: any) {
 			await navigator.clipboard.writeText(text);
 			setIsCopied(true);
 			setErr(null);
-			event();
 		} catch (err) {
 			setErr("Failed to copy");
 		}

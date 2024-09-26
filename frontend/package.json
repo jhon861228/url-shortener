@@ -19,7 +19,6 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "antd": "^5.20.6",
     "astro": "^4.14.5",
     "astro-aws-amplify": "^0.1.0",
     "class-variance-authority": "^0.7.0",

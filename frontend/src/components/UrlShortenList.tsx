@@ -3,13 +3,11 @@ import { useStore } from "@nanostores/react";
 import CopyButton from "./CopyButton";
 import { urlCreated } from "../store/urlStore";
 import { useEffect, useState } from "react";
-import { message } from "antd";
 import { Button } from "./ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 const UrlShortenList: React.FC = () => {
 	const [urls, setUrls] = useState([]);
-	const [contextHolder] = message.useMessage();
 	const [showAllHistory, setShowAllHistory] = useState(false);
 
 	const $urlStore = useStore(urlCreated);
@@ -26,7 +24,6 @@ const UrlShortenList: React.FC = () => {
 
 	return (
 		<>
-			{contextHolder}
 			{urls.length > 0 && (
 				<div className="mt-8">
 					<h3 className="text-lg font-semibold text-gray-700 mb-4">

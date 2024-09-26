@@ -5,7 +5,6 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { message } from "antd";
 import { useClipboard } from "@/hooks/useClipboard";
 import { Check, Copy } from "lucide-react";
 
@@ -14,19 +13,10 @@ interface CopyButtonProps {
 }
 
 const CopyButton = ({ url }: CopyButtonProps) => {
-	const success = () => {
-		messageApi.open({
-			type: "success",
-			content: "Url copiada",
-		});
-	};
-
-	const [messageApi, contextHolder] = message.useMessage();
-	const { isCopied, copyToClipboard } = useClipboard(success);
+	const { isCopied, copyToClipboard } = useClipboard();
 
 	return (
 		<TooltipProvider>
-			{contextHolder}
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Button
