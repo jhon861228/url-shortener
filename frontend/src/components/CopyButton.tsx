@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useClipboard } from "@/hooks/useClipboard";
-import { Check, Copy } from "lucide-react";
 
 interface CopyButtonProps {
 	url: string;
@@ -26,9 +25,9 @@ const CopyButton = ({ url }: CopyButtonProps) => {
 						className="ml-2 h-8 text-gray-500 hover:text-gray-700"
 					>
 						{isCopied ? (
-							<Check className="h-4 w-4" />
+							<span className="h-4 w-4">Check</span>
 						) : (
-							<Copy className="h-4 w-4" />
+							<span className="h-4 w-4">Copy</span>
 						)}
 						<span className="sr-only">Copy URL</span>
 					</Button>
