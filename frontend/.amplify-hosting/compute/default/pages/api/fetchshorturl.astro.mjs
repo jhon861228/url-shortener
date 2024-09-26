@@ -3,11 +3,12 @@ export { renderers } from '../../renderers.mjs';
 const POST = async ({ request }) => {
   try {
     const body = await request.json();
-    const apiUrl = "https://4o41uoibs7.execute-api.us-east-1.amazonaws.com/prod/short-url";
+    const apiUrl = `${"https://example.com/prod"}short-url`;
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-api-key": "VHCVv8ixAp7yI1jSq4YX26CbU1CFzSm21ANKbpU7"
       },
       body: JSON.stringify(body)
     });
