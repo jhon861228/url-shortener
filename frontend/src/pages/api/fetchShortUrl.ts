@@ -4,12 +4,12 @@ export const POST: APIRoute = async ({ request }) => {
 	try {
 		const body = await request.json();
 
-		const apiUrl =
-			"https://4o41uoibs7.execute-api.us-east-1.amazonaws.com/prod/short-url";
+		const apiUrl = `${import.meta.env.ENDPOINT_API}short-url`;
 		const response = await fetch(apiUrl, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+				"x-api-key": import.meta.env.ENDPOINT_API_KEY,
 			},
 			body: JSON.stringify(body),
 		});
