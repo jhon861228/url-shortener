@@ -6,15 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import IndexLayout from "../layouts/IndexLayout.astro";
 import UrlShortenCreation from "../components/UrlShortenCreation";
 import UrlShortenList from "../components/UrlShortenList";
-const apiUrl = import.meta.env.ENDPOINT_API;
-const apiKey = import.meta.env.ENDPOINT_API_KEY;
 ---
 
 <IndexLayout title="Acortador de Urls">
 	<Card className="w-full max-w-md bg-white bg-opacity-90 backdrop-blur-md shadow-xl">
 		<CardHeader className="text-center">
 		  <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">
-			Acortador de Urls { apiUrl } { apiKey }
+			Acortador de Urls
 		  </CardTitle>
 		</CardHeader>
 		<CardContent>

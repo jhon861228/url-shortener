@@ -1,14 +1,28 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCreateUrl } from "../hooks/useCreateUrl";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import CopyButton from "./CopyButton";
+import { useToast } from "@/hooks/use-toast";
 
 const UrlShortenCreation: React.FC = () => {
 	const [urlOriginal, setUrlOriginal] = useState("");
 
 	const { urlShorted, createUrl } = useCreateUrl();
+
+	useEffect(() => {
+		if (urlShorted) {
+			toast({
+				title: "URL acortada",
+				description: "Tu URL fue acortada con éxito",
+				variant: "destructive",
+			});
+		}
+	}, [urlShorted]);
+	
+
+	const { toast } = useToast()
 
 	const handleSubmit = () => {
 		createUrl(urlOriginal);
