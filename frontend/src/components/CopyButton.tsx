@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useClipboard } from "@/hooks/useClipboard";
+import IconCopy from "./ui/IconCopy";
 
 interface CopyButtonProps {
 	url: string;
@@ -24,11 +25,7 @@ const CopyButton = ({ url }: CopyButtonProps) => {
 						onClick={() => copyToClipboard(url)}
 						className="ml-2 h-8 text-gray-500 hover:text-gray-700"
 					>
-						{isCopied ? (
-							<span className="h-4 w-4">Check</span>
-						) : (
-							<span className="h-4 w-4">Copy</span>
-						)}
+						<IconCopy className="h-4 w-4"/>
 						<span className="sr-only">Copy URL</span>
 					</Button>
 				</TooltipTrigger>
