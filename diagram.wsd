@@ -6,10 +6,21 @@
 !includeurl AWSPuml/ManagementGovernance/CloudWatch.puml
 !includeurl AWSPuml/ApplicationIntegration/APIGateway.puml
 
-APIGateway(api_gateway, "API Gateway", "Url Shortener ApiGW")
-Lambda(lambda_function, "AWS Lambda", "Url Shortener Function handler")
-DynamoDB(dynamo_table, "DynamoDB", "Url Shortener Table for storage")
-CloudWatch(cloudWatch_logs, "CloudWatch", "Monitoring logs")
+!includeurl AWSPuml/Groups/AWSAccount.puml
+!includeurl AWSPuml/Groups/VPC.puml
+!includeurl AWSPuml/Groups/Region.puml
+
+RegionGroup(aws_region, "AWS Region") {
+    AWSAccountGroup(aws_account, "AWS Account") {
+        VPCGroup(aws_vpc, "AWS VPC") {
+            APIGateway(api_gateway, "API Gateway", "Url Shortener ApiGW")
+            Lambda(lambda_function, "AWS Lambda", "Url Shortener Function handler")
+            DynamoDB(dynamo_table, "DynamoDB", "Url Shortener Table for storage")
+            CloudWatch(cloudWatch_logs, "CloudWatch", "Monitoring logs")
+        }
+    }
+}
+
 
 api_gateway --> lambda_function : "Invoke"
 lambda_function --> dynamo_table : "Read/Write"
