@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { urlCreated } from "../store/urlStore";
+import type { UrlShortenModel } from "@/models/UrlShorten.model";
+import { parseDate } from "@/utils/DateUtil";
 
 export function useCreateUrl() {
-	const [urlShorted, setUrlShorted] = useState<string>("");
+	const [urlShorted, setUrlShorted] = useState<UrlShortenModel>();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +25,11 @@ export function useCreateUrl() {
 			}
 
 			const result = await res.json();
-			setUrlShorted(result.urlShorted);
-			saveOnStorage(result.urlShorted);
+			setUrlShorted({
+				url: result.urlShorted,
+				createdAt: parseDate(result.createdAt).toLocaleDateString(),
+			});
+			saveOnStorage(urlShorted);
 			urlCreated.set(result.urlShorted);
 		} catch (error: any) {
 			setError(error.message);
@@ -33,12 +38,14 @@ export function useCreateUrl() {
 		}
 	};
 
-	const saveOnStorage = (url: string) => {
-		const urls: string[] = JSON.parse(
-			window.localStorage.getItem("urlShorten") || "[]",
-		);
-		urls.unshift(url);
-		window.localStorage.setItem("urlShorten", JSON.stringify(urls));
+	const saveOnStorage = (url: UrlShortenModel | undefined) => {
+		if(url) {
+			const urls: UrlShortenModel[] = JSON.parse(
+				window.localStorage.getItem("urlShorten") || "[]",
+			);
+			urls.unshift(url);
+			window.localStorage.setItem("urlShorten", JSON.stringify(urls));
+		}
 	};
 
 	return { urlShorted, createUrl, loading, error };

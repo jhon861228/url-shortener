@@ -36,8 +36,7 @@ resource "aws_dynamodb_table" "shorturl_table" {
   global_secondary_index {
     name            = var.urlOriginalIndex
     hash_key        = var.urlOriginalIndexField
-    projection_type = "INCLUDE"
-    non_key_attributes = [var.urlOriginalIndexField, "urlShorted"]
+    projection_type = "ALL"
   }
   attribute {
     name = var.urlOriginalIndexField

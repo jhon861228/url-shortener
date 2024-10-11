@@ -231,6 +231,9 @@
             "properties": {
                 "urlShorted": {
                     "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
                 }
             }
         },

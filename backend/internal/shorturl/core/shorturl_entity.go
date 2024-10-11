@@ -17,6 +17,7 @@ type UrlRequest struct {
 
 type UrlResponse struct {
 	UrlShorted string `json:"urlShorted" validate:"required"`
+	CreatedAt  string `json:"createdAt" validate:"required"`
 }
 
 var validate *validator.Validate

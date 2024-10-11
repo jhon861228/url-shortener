@@ -47,7 +47,7 @@ func (h *ShortUrlLambdaHandler) handleCreateUrl(request events.APIGatewayProxyRe
 		}, nil
 	}
 
-	bodyResponse, _ := json.Marshal(core.UrlResponse{UrlShorted: url.UrlShorted})
+	bodyResponse, _ := json.Marshal(core.UrlResponse{UrlShorted: url.UrlShorted, CreatedAt: url.CreatedAt})
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       string(bodyResponse),
