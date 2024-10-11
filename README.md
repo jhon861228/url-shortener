@@ -76,3 +76,29 @@ url-shortener/
    cd backend && ./build.sh
    ```
 
+## 📈 Sequence Backend Diagram 
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant API Gateway
+    participant Lambda
+    participant Service
+    participant Repository
+    participant DynamoDB
+
+    User->>API Gateway: HTTP Request (GET/POST)
+    API Gateway->>Lambda: Invoke Lambda Function
+    Lambda->>Service: Call Service Method (CreateUrl/GetUrl)
+    Service->>Repository: Save/GetByID/GetByField
+    Repository->>DynamoDB: PutItem/GetItem/Query
+    DynamoDB-->>Repository: Response
+    Repository-->>Service: Response
+    Service-->>Lambda: Response
+    Lambda-->>API Gateway: Response
+    API Gateway-->>User: HTTP Response
+```
+
+## 🏗️ Backend Architecture Diagram
+[Backend Architecture Diagram](diagram.wsd)
+For a detailed view of the backend architecture, refer to the `diagram.wsd` file. This file contains a comprehensive diagram that illustrates the various components and their interactions within the backend system.
